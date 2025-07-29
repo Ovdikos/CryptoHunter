@@ -21,19 +21,21 @@ public class BingxApiClient : IExchangeApiClient
             .Select(p => p.FromCurrencyNavigation.Symbol + p.ToCurrencyNavigation.Symbol)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
+    
+    public string ExchangeName => _exchangeName;
 
     public async Task<IEnumerable<CurrencyPairRateDto>> GetAllPairRates(CancellationToken ct = default)
     {
-
+        
         var list = new List<CurrencyPairRateDto>();
-
+        
         foreach (var sym in _supportedSymbols)
         {
             var symbol = sym.Insert(sym.Length - 4, "-");
-
+        
             var resp = await _http.GetFromJsonAsync<BingxResponse>(
                 $"/openApi/swap/v2/quote/price?symbol={symbol}", ct);
-
+        
             if (resp?.Data != null)
             {
                 list.Add(new CurrencyPairRateDto
@@ -42,9 +44,26 @@ public class BingxApiClient : IExchangeApiClient
                     Rate = decimal.Parse(resp.Data.Price),
                     ExchangeName = _exchangeName
                 });
-
+        
             }
         }
         return list;
+    }
+
+    public async Task<TickerResponseDto> GetTicker(string pair, CancellationToken ct = default)
+    {
+        var symbol = $"{pair[..^4]}-USDT";
+        var resp = await _http.GetFromJsonAsync<BingxBookResponse>(
+            $"/openApi/spot/v1/ticker/bookTicker?symbol={symbol}", ct);
+        
+        var raw = resp?.Data?.FirstOrDefault()
+                  ?? throw new InvalidOperationException($"BingX no data for {pair}");
+
+        return new TickerResponseDto
+        {
+            Symbol = raw.Symbol.Replace("-", ""),
+            Bid    = decimal.Parse(raw.BidPrice),
+            Ask    = decimal.Parse(raw.AskPrice)
+        };
     }
 }

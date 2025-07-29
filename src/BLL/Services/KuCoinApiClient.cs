@@ -27,6 +27,8 @@ public class KuCoinApiClient : IExchangeApiClient
         
     }
     
+    public string ExchangeName => _exchangeName;
+    
     public async Task<IEnumerable<CurrencyPairRateDto>> GetAllPairRates(CancellationToken ct = default)
     {
         
@@ -59,5 +61,23 @@ public class KuCoinApiClient : IExchangeApiClient
         }
 
         return result;
+    }
+
+    public async Task<TickerResponseDto> GetTicker(string pair, CancellationToken ct = default)
+    {
+        var symbol = $"{pair[..^4]}-USDT";
+        var resp = await _http.GetFromJsonAsync<KuCoinBookResponse>(
+            $"/api/v1/market/orderbook/level1?symbol={symbol}", ct);
+
+        if (resp?.Data is null)
+            throw new InvalidOperationException($"KuCoin no data for {symbol}");
+
+        var raw = resp.Data;
+        return new TickerResponseDto
+        {
+            Symbol = pair,
+            Bid    = decimal.Parse(raw.BestBid),
+            Ask    = decimal.Parse(raw.BestAsk)
+        };
     }
 }

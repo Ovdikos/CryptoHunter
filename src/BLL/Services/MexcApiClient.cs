@@ -24,6 +24,8 @@ public class MexcApiClient : IExchangeApiClient
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
     
+    public string ExchangeName => _exchangeName;
+    
     
     public async Task<IEnumerable<CurrencyPairRateDto>> GetAllPairRates(CancellationToken ct = default)
     {
@@ -42,5 +44,23 @@ public class MexcApiClient : IExchangeApiClient
                 ExchangeName = _exchangeName
             });
         
+    }
+
+    public async Task<TickerResponseDto> GetTicker(string pair, CancellationToken ct = default)
+    {
+        var symbol = $"{pair[..^4]}_USDT";
+        var wrapper = await _http.GetFromJsonAsync<MexcBookTicker>(
+            $"https://api.mexc.com/api/v3/ticker/bookTicker?symbol={pair}", ct);
+
+        var raw = await _http.GetFromJsonAsync<MexcBookTicker>(
+                      $"/api/v3/ticker/bookTicker?symbol={pair}", ct)
+                  ?? throw new InvalidOperationException($"MEXC no data for {pair}");
+
+        return new TickerResponseDto
+        {
+            Symbol = raw.Symbol.Replace("_", ""),
+            Bid    = decimal.Parse(raw.BidPrice),
+            Ask    = decimal.Parse(raw.AskPrice)
+        };
     }
 }

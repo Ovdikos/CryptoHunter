@@ -1,8 +1,11 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using BLL.DTOs;
 using BLL.Interfaces;
 using Core.Config;
 using Core.Config.Bybit;
+using Core.Config.Bybit.Arbitrage;
+using Core.Config.Bybit.Coin;
 using DAL.Interfaces;
 
 namespace BLL.Services;
@@ -26,25 +29,57 @@ public class BybitApiClient : IExchangeApiClient
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         
     }
+    
+    public string ExchangeName => _exchangeName;
 
 
     public async Task<IEnumerable<CurrencyPairRateDto>> GetAllPairRates(CancellationToken ct = default)
     {
-        var symbolsCsv = string.Join(',', _supportedSymbols);
+        var list = new List<CurrencyPairRateDto>();
 
-        var resp = await _http.GetFromJsonAsync<BybitResponse>(
-            $"/v5/market/tickers?category=spot&symbol={symbolsCsv}", ct);
-
-        var list = resp?.Result?.List;
-        if (list == null || list.Count == 0)
-            return Enumerable.Empty<CurrencyPairRateDto>();
-
-        return list
-            .Select(t => new CurrencyPairRateDto
+        foreach (var sym in _supportedSymbols)
+        {
+            try
             {
-                PairSymbol   = $"{t.Symbol.Substring(0,3)}/{t.Symbol.Substring(3)}",
-                Rate         = decimal.Parse(t.LastPrice),
-                ExchangeName = _exchangeName
-            });
+                var resp = await _http.GetFromJsonAsync<
+                    BybitResponse<BybitTickerListResult>>(
+                    $"/v5/market/tickers?category=spot&symbol={sym}", ct);
+
+                var item = resp?.Result?.List?.FirstOrDefault();
+                if (item == null)
+                    continue;
+
+                list.Add(new CurrencyPairRateDto
+                {
+                    PairSymbol   = sym.Insert(sym.Length - 4, "/"),  
+                    Rate         = decimal.Parse(item.LastPrice),
+                    ExchangeName = _exchangeName
+                });
+            }
+            catch (HttpRequestException e) when (
+                e.StatusCode == HttpStatusCode.NotFound ||
+                e.StatusCode == HttpStatusCode.BadRequest)
+            {
+            }
+        }
+
+        return list;
+    }
+
+    public async Task<TickerResponseDto> GetTicker(string pair, CancellationToken ct = default)
+    {
+        var url = $"/v5/market/tickers?category=spot&symbol={pair}";
+        var resp = await _http.GetFromJsonAsync<
+            BybitResponse<BybitTickerListResult>>(url, ct);
+
+        var item = resp?.Result?.List?.FirstOrDefault()
+                   ?? throw new InvalidOperationException($"Bybit no data for {pair}");
+
+        return new TickerResponseDto
+        {
+            Symbol = item.Symbol,
+            Bid    = decimal.Parse(item.Bid1Price),
+            Ask    = decimal.Parse(item.Ask1Price)
+        };
     }
 }

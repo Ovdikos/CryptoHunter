@@ -5,4 +5,7 @@ public class CurrencyPairRateDto
     public string PairSymbol   { get; set; }  
     public decimal Rate        { get; set; }  
     public string ExchangeName { get; set; }  
+    
+    public decimal Bid         { get; set; }
+    public decimal Ask         { get; set; }
 }

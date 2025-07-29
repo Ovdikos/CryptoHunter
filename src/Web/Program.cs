@@ -99,6 +99,9 @@ builder.Services
 builder.Services.AddTransient<IExchangeApiClient>(sp =>
     sp.GetRequiredService<KuCoinApiClient>());
 
+builder.Services.AddTransient<IArbitrageService, ArbitrageService>();
+builder.Services.AddTransient<IPriceService, PriceService>();
+
 
 
 

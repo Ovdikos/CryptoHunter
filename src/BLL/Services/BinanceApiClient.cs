@@ -26,6 +26,8 @@ public class BinanceApiClient : IExchangeApiClient
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
+    public string ExchangeName => _exchangeName;
+
     public async Task<IEnumerable<CurrencyPairRateDto>> GetAllPairRates(CancellationToken ct = default)
     {
         
@@ -44,4 +46,19 @@ public class BinanceApiClient : IExchangeApiClient
             });
     }
 
+    public async Task<TickerResponseDto> GetTicker(string pair, CancellationToken ct = default)
+    {
+        var raw = await _http.GetFromJsonAsync<BinanceBookTicker>(
+            $"/api/v3/ticker/bookTicker?symbol={pair}", ct);
+
+        if (raw is null)
+            throw new InvalidOperationException($"Binance returned no data for {pair}");
+
+        return new TickerResponseDto
+        {
+            Symbol = raw.symbol,
+            Bid    = decimal.Parse(raw.bidPrice),
+            Ask    = decimal.Parse(raw.askPrice)
+        };
+    }
 }
