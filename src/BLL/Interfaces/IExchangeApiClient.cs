@@ -1,4 +1,6 @@
 ﻿using BLL.DTOs;
+using BLL.DTOs._24hStat;
+using BLL.DTOs.Arbitrage;
 
 namespace BLL.Interfaces;
 
@@ -7,8 +9,8 @@ public interface IExchangeApiClient
     
     string ExchangeName { get; }
     
-    Task<IEnumerable<CurrencyPairRateDto>> GetAllPairRates(CancellationToken ct = default);
-    
     Task<TickerResponseDto> GetTicker(string pair, CancellationToken ct = default);
+    
+    Task<Exchange24hDto> Get24hStats(string pair, CancellationToken ct = default);
     
 }

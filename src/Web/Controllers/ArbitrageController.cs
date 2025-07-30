@@ -1,4 +1,5 @@
 ﻿using BLL.DTOs;
+using BLL.DTOs.Arbitrage;
 using BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,7 +47,7 @@ namespace Web.Controllers
             var pair = coin.ToUpper() + "USDT";
             try
             {
-                var dto = await _arb.GetOpportunityAsync(pair);
+                var dto = await _arb.GetOpportunity(pair);
                 return Ok(dto);
             }
             catch (InvalidOperationException)

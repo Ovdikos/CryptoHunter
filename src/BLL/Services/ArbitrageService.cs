@@ -1,5 +1,6 @@
 ﻿using BLL.DTOs;
-using BLL.Extensions;
+using BLL.DTOs.Arbitrage;
+using BLL.DTOs.Price;
 using BLL.Interfaces;
 
 namespace BLL.Services;
@@ -31,7 +32,7 @@ public class ArbitrageService : IArbitrageService
         return results.Where(x => x != null)!;
     }
 
-    public async Task<ArbitrageQuickDto> GetOpportunityAsync(string pair)
+    public async Task<ArbitrageQuickDto> GetOpportunity(string pair)
     {
         var tasks = _clients.Select(async c =>
         {

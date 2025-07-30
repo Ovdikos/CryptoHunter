@@ -1,5 +1,5 @@
-﻿// BLL/Services/PriceService.cs
-using BLL.DTOs;
+﻿using BLL.DTOs;
+using BLL.DTOs.Price;
 using BLL.Interfaces;
 
 public class PriceService : IPriceService
@@ -9,7 +9,7 @@ public class PriceService : IPriceService
     public PriceService(IEnumerable<IExchangeApiClient> clients)
         => _clients = clients;
 
-    public async Task<PriceDto> GetHighestBidAsync(string pair)
+    public async Task<PriceDto> GetHighestBid(string pair)
     {
         var quotes = await CollectQuotesAsync(pair);
         var best = quotes.OrderByDescending(q => q.Price).First();
@@ -20,7 +20,7 @@ public class PriceService : IPriceService
         };
     }
 
-    public async Task<PriceDto> GetLowestAskAsync(string pair)
+    public async Task<PriceDto> GetLowestAsk(string pair)
     {
         var quotes = await CollectQuotesAsync(pair);
         var best = quotes.OrderBy(q => q.Price).First();

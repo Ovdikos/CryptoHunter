@@ -1,8 +1,12 @@
 ﻿using System.Net.Http.Json;
 using BLL.DTOs;
+using BLL.DTOs._24hStat;
+using BLL.DTOs.Arbitrage;
 using BLL.Interfaces;
 using Core.Config;
 using Core.Config.Binance;
+using Core.Config.Binance._24hStat;
+using Core.Config.Binance.Arbitrage;
 using DAL.Interfaces;
 
 namespace BLL.Services;
@@ -28,27 +32,10 @@ public class BinanceApiClient : IExchangeApiClient
 
     public string ExchangeName => _exchangeName;
 
-    public async Task<IEnumerable<CurrencyPairRateDto>> GetAllPairRates(CancellationToken ct = default)
-    {
-        
-        var raw = await _http.GetFromJsonAsync<List<BinanceTicker>>("/api/v3/ticker/price", ct);
-
-        if (raw is null)
-            return Enumerable.Empty<CurrencyPairRateDto>();
-
-        return raw
-            .Where(t => _supportedSymbols.Contains(t.Symbol))
-            .Select(t => new CurrencyPairRateDto
-            {
-                PairSymbol   = $"{t.Symbol.Substring(0,3)}/{t.Symbol.Substring(3)}",
-                Rate         = decimal.Parse(t.Price),
-                ExchangeName = _exchangeName
-            });
-    }
 
     public async Task<TickerResponseDto> GetTicker(string pair, CancellationToken ct = default)
     {
-        var raw = await _http.GetFromJsonAsync<BinanceBookTicker>(
+        var raw = await _http.GetFromJsonAsync<BinanceArbitrage>(
             $"/api/v3/ticker/bookTicker?symbol={pair}", ct);
 
         if (raw is null)
@@ -59,6 +46,28 @@ public class BinanceApiClient : IExchangeApiClient
             Symbol = raw.symbol,
             Bid    = decimal.Parse(raw.bidPrice),
             Ask    = decimal.Parse(raw.askPrice)
+        };
+    }
+
+    public async Task<Exchange24hDto> Get24hStats(string pair, CancellationToken ct = default)
+    {
+        var raw = await _http.GetFromJsonAsync<BinanceDayStat>(
+            $"/api/v3/ticker/24hr?symbol={pair}", ct);
+
+        if (raw is null)
+            throw new InvalidOperationException($"Binance no 24h data for {pair}");
+
+        return new Exchange24hDto
+        {
+            Exchange          = ExchangeName,
+            Pair              = pair,
+            Open              = decimal.Parse(raw.openPrice),
+            High              = decimal.Parse(raw.highPrice),
+            Low               = decimal.Parse(raw.lowPrice),
+            Close             = decimal.Parse(raw.lastPrice),
+            Volume            = decimal.Parse(raw.volume),
+            PriceChangePct    = decimal.Parse(raw.priceChangePercent),
+            WeightedAvgPrice  = decimal.Parse(raw.weightedAvgPrice)
         };
     }
 }

@@ -1,10 +1,11 @@
 ﻿using BLL.DTOs;
+using BLL.DTOs.Price;
 
 namespace BLL.Interfaces;
 
 public interface IPriceService
 {
-    Task<PriceDto> GetHighestBidAsync(string pair);
+    Task<PriceDto> GetHighestBid(string pair);
     
-    Task<PriceDto> GetLowestAskAsync(string pair);
+    Task<PriceDto> GetLowestAsk(string pair);
 }

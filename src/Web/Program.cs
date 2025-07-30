@@ -101,6 +101,7 @@ builder.Services.AddTransient<IExchangeApiClient>(sp =>
 
 builder.Services.AddTransient<IArbitrageService, ArbitrageService>();
 builder.Services.AddTransient<IPriceService, PriceService>();
+builder.Services.AddTransient<IMarketService, MarketService>();
 
 
 

@@ -1,8 +1,11 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using BLL.DTOs;
+using BLL.DTOs._24hStat;
+using BLL.DTOs.Arbitrage;
 using BLL.Interfaces;
 using Core.Config.Coinbase;
+using Core.Config.Coinbase._24hStat;
 using Core.Config.Coinbase.Arbitrage;
 using DAL.Interfaces;
 
@@ -18,6 +21,8 @@ public class CoinbaseApiClient : IExchangeApiClient
     public CoinbaseApiClient(HttpClient http, ICurrencyPairRepository pairRepo)
     {
         _http = http;
+        
+        _http.DefaultRequestHeaders.UserAgent.ParseAdd("CryptoHunter/1.0");
 
         _supportedSymbols = pairRepo.GetAllAsync().Result
             .Select(p => p.FromCurrencyNavigation.Symbol 
@@ -28,60 +33,53 @@ public class CoinbaseApiClient : IExchangeApiClient
     
     public string ExchangeName => _exchangeName;
 
-
-    public async Task<IEnumerable<CurrencyPairRateDto>> GetAllPairRates(CancellationToken ct = default)
-    {
-
-        var result = new List<CurrencyPairRateDto>();
-
-        foreach (var pair in _supportedSymbols)
-        {
-            var parts = pair.Split('-', 2);
-            var baseCur = parts[0];
-            var quoteCur = parts[1];
-
-            var productId = $"{baseCur}-{quoteCur}";
-
-            try
-            {
-                var resp = await _http.GetFromJsonAsync<CoinbaseResponse>(
-                    $"/v2/prices/{productId}/spot", ct);
-
-                if (resp?.Data != null)
-                {
-                    result.Add(new CurrencyPairRateDto
-                    {
-                        PairSymbol = $"{baseCur}/{quoteCur}",
-                        Rate = decimal.Parse(resp.Data.Amount),
-                        ExchangeName = _exchangeName
-                    });
-                }
-            }
-            catch (HttpRequestException e) when (
-                e.StatusCode == System.Net.HttpStatusCode.BadRequest ||
-                e.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-            }
-        }
-
-        return result;
-    }
-
     public async Task<TickerResponseDto> GetTicker(string pair, CancellationToken ct = default)
     {
         var symbol = $"{pair[..^4]}-USDT";
-        var uri = new Uri($"https://api.exchange.coinbase.com/products/{symbol}/ticker");
-        Console.WriteLine("REQUEST TO: " + uri);
-        var raw = await _http.GetFromJsonAsync<CoinbaseProductTicker>(uri, ct);
-
+        
+        var raw = await _http.GetFromJsonAsync<CoinbaseArbitrageTicker>(
+            $"/products/{symbol}/ticker", ct);
+        
         if (raw is null)
             throw new InvalidOperationException($"Coinbase no data for {symbol}");
-
+                
         return new TickerResponseDto
         {
             Symbol = pair,
             Bid    = decimal.Parse(raw.Bid),
             Ask    = decimal.Parse(raw.Ask)
+        };
+    }
+
+    public async Task<Exchange24hDto> Get24hStats(string pair, CancellationToken ct = default)
+    {
+        var productId = $"{pair[..^4]}-{pair[^4..]}";
+
+        var raw = await _http.GetFromJsonAsync<CoinbaseDayStatResponse>(
+            $"/products/{productId}/stats", ct);
+        if (raw is null)
+            throw new InvalidOperationException($"Coinbase no 24h data for {pair}");
+
+        var open   = decimal.Parse(raw.Open);
+        var high   = decimal.Parse(raw.High);
+        var low    = decimal.Parse(raw.Low);
+        var close  = decimal.Parse(raw.Last);
+        var vol    = decimal.Parse(raw.Volume);
+
+        var pctChange   = open != 0 ? (close - open) / open * 100 : 0m;
+        var weightedAvg = (open + high + low + close) / 4;
+
+        return new Exchange24hDto
+        {
+            Exchange         = _exchangeName,
+            Pair             = pair,
+            Open             = open,
+            High             = high,
+            Low              = low,
+            Close            = close,
+            Volume           = vol,
+            PriceChangePct   = pctChange,
+            WeightedAvgPrice = weightedAvg
         };
     }
 }

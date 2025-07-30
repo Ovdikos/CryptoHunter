@@ -21,20 +21,5 @@ public class CurrencyPairRepository : ICurrencyPairRepository
             .Include(cp => cp.ToCurrencyNavigation)
             .ToListAsync(cancellationToken);
     }
-
-    public async Task<CurrencyPair?> GetBySymbolsAsync(
-        string fromCurrencySymbol,
-        string toCurrencySymbol,
-        CancellationToken cancellationToken = default
-    )
-    {
-        return await _ctx.CurrencyPairs
-            .Include(cp => cp.FromCurrencyNavigation)
-            .Include(cp => cp.FromCurrencyNavigation)
-            .Where(cp =>
-                cp.FromCurrencyNavigation.Symbol == fromCurrencySymbol &&
-                cp.ToCurrencyNavigation.Symbol   == toCurrencySymbol
-            )
-            .FirstOrDefaultAsync(cancellationToken);
-    }
+    
 }

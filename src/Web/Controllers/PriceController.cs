@@ -1,4 +1,5 @@
 ﻿using BLL.DTOs;
+using BLL.DTOs.Price;
 using BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +18,7 @@ namespace Web.Controllers
             var pair = coin.ToUpper() + "USDT";
             try
             {
-                var result = await _svc.GetHighestBidAsync(pair);
+                var result = await _svc.GetHighestBid(pair);
                 return Ok(result);
             }
             catch (InvalidOperationException)
@@ -32,7 +33,7 @@ namespace Web.Controllers
             var pair = coin.ToUpper() + "USDT";
             try
             {
-                var result = await _svc.GetLowestAskAsync(pair);
+                var result = await _svc.GetLowestAsk(pair);
                 return Ok(result);
             }
             catch (InvalidOperationException)
