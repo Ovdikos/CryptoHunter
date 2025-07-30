@@ -1,14 +1,20 @@
 ﻿using BLL.DTOs;
 using BLL.DTOs._24hStat;
+using BLL.DTOs.PriceChangeIn24h;
 using BLL.Interfaces;
+using DAL.Interfaces;
 
 namespace BLL.Services;
 
 public class MarketService : IMarketService
 {
     private readonly IEnumerable<IExchangeApiClient> _clients;
-    public MarketService(IEnumerable<IExchangeApiClient> clients)
-        => _clients = clients;
+    private readonly ICurrencyPairRepository _pairRepo;
+    public MarketService(IEnumerable<IExchangeApiClient> clients, ICurrencyPairRepository pairRepo)
+    {
+        _clients = clients;
+        _pairRepo = pairRepo;
+    }
 
     public async Task<MarketSummaryDto> Get24hSummary(string pair)
     {
@@ -60,5 +66,41 @@ public class MarketService : IMarketService
             PerExchange = results,
             Aggregated  = aggregated
         };
+    }
+
+    public async Task<IReadOnlyList<TopPairDto>> GetTopPairs(string type, int limit, CancellationToken ct = default)
+    {
+        var pairs = await _pairRepo.GetAllAsync();
+
+        var tasks = pairs.Select(async p =>
+        {
+            try
+            {
+                var summary = await Get24hSummary(p.FromCurrencyNavigation.Symbol
+                                                  + p.ToCurrencyNavigation.Symbol);
+                return new TopPairDto {
+                    Pair            = p.FromCurrencyNavigation.Symbol
+                                      + p.ToCurrencyNavigation.Symbol,
+                    PriceChangePct  = summary.Aggregated.PriceChangePct,
+                    Volume          = summary.Aggregated.Volume
+                };
+            }
+            catch
+            {
+                return null;
+            }
+        });
+
+        var all = (await Task.WhenAll(tasks))
+            .Where(x => x != null)!
+            .ToList()!;
+
+        var sorted = type.ToLower() switch
+        {
+            "gainers" => all.OrderByDescending(x => x.PriceChangePct),
+            "losers"  => all.OrderBy(x => x.PriceChangePct),
+            _         => throw new ArgumentException("type must be 'gainers' or 'losers'")
+        };
+        return sorted.Take(limit).ToList();
     }
 }

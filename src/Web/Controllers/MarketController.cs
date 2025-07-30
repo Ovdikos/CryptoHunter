@@ -1,5 +1,6 @@
 ﻿using BLL.DTOs;
 using BLL.DTOs._24hStat;
+using BLL.DTOs.PriceChangeIn24h;
 using BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,5 +23,23 @@ public class MarketController : ControllerBase
         {
             return NotFound(e.Message);
         }
+    }
+    [HttpGet("toppairs")]
+    [ProducesResponseType(typeof(IEnumerable<TopPairDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetTopPairs(
+        [FromQuery] string type,
+        [FromQuery] int limit = 10,
+        CancellationToken ct = default)
+    {
+        if (limit <= 0)
+            return BadRequest("Limit must be greater than zero.");
+
+        type = type?.ToLowerInvariant() ?? "";
+        if (type != "gainers" && type != "losers")
+            return BadRequest("Type must be either 'gainers' or 'losers'.");
+
+        var result = await _svc.GetTopPairs(type, limit, ct);
+        return Ok(result);
     }
 }
