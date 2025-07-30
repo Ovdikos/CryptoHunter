@@ -1,5 +1,6 @@
 ﻿using BLL.DTOs;
 using BLL.DTOs._24hStat;
+using BLL.DTOs.Converter;
 using BLL.DTOs.PriceChangeIn24h;
 
 namespace BLL.Interfaces;
@@ -11,4 +12,5 @@ public interface IMarketService
         string type,
         int limit, 
         CancellationToken ct = default);
+    Task<ConversionDto> Convert(string fromPair, string toPair, decimal amount);
 }

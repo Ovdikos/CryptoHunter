@@ -1,5 +1,5 @@
-﻿using BLL.DTOs;
-using BLL.DTOs._24hStat;
+﻿using BLL.DTOs._24hStat;
+using BLL.DTOs.Converter;
 using BLL.DTOs.PriceChangeIn24h;
 using BLL.Interfaces;
 using DAL.Interfaces;
@@ -102,5 +102,68 @@ public class MarketService : IMarketService
             _         => throw new ArgumentException("type must be 'gainers' or 'losers'")
         };
         return sorted.Take(limit).ToList();
+    }
+
+    public async Task<ConversionDto> Convert(string fromPair, string toPair, decimal amount)
+    {
+        var bidTasks = _clients.Select(async c =>
+        {
+            try
+            {
+                var t = await c.GetTicker(fromPair);
+                return (exchange: c.ExchangeName, bid: (decimal?)t.Bid);
+            }
+            catch
+            {
+                return (exchange: c.ExchangeName, bid: (decimal?)null);
+            }
+        });
+        var bidResults = await Task.WhenAll(bidTasks);
+
+        var validBids = bidResults.Where(x => x.bid.HasValue);
+        if (!validBids.Any())
+            throw new InvalidOperationException($"No bids for {fromPair}");
+
+        var bestBidEntry = validBids
+            .OrderByDescending(x => x.bid!.Value)
+            .First();
+
+        var askTasks = _clients.Select(async c =>
+        {
+            try
+            {
+                var t = await c.GetTicker(toPair);
+                return (exchange: c.ExchangeName, ask: (decimal?)t.Ask);
+            }
+            catch
+            {
+                return (exchange: c.ExchangeName, ask: (decimal?)null);
+            }
+        });
+        var askResults = await Task.WhenAll(askTasks);
+
+        var validAsks = askResults.Where(x => x.ask.HasValue);
+        if (!validAsks.Any())
+            throw new InvalidOperationException($"No asks for {toPair}");
+
+        var bestAskEntry = validAsks
+            .OrderBy(x => x.ask!.Value)
+            .First();
+
+        var usdtAmount = amount * bestBidEntry.bid!.Value;
+        var toAmount   = usdtAmount / bestAskEntry.ask!.Value;
+
+        return new ConversionDto
+        {
+            FromPair    = fromPair,
+            ToPair      = toPair,
+            FromAmount  = amount,
+            UsdtAmount  = usdtAmount,
+            ToAmount    = toAmount,
+            BestBid     = bestBidEntry.bid.Value,
+            BidExchange = bestBidEntry.exchange,
+            BestAsk     = bestAskEntry.ask.Value,
+            AskExchange = bestAskEntry.exchange
+        };
     }
 }

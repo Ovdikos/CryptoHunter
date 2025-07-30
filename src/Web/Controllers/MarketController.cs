@@ -1,5 +1,6 @@
 ﻿using BLL.DTOs;
 using BLL.DTOs._24hStat;
+using BLL.DTOs.Converter;
 using BLL.DTOs.PriceChangeIn24h;
 using BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -41,5 +42,29 @@ public class MarketController : ControllerBase
 
         var result = await _svc.GetTopPairs(type, limit, ct);
         return Ok(result);
+    }
+    
+    [HttpGet]
+    public async Task<ActionResult<ConversionDto>> Get(
+        [FromQuery] string from,
+        [FromQuery] string to,
+        [FromQuery] decimal amount)
+    {
+        if (string.IsNullOrWhiteSpace(from) ||
+            string.IsNullOrWhiteSpace(to)   ||
+            amount <= 0)
+        {
+            return BadRequest("Parameters 'from', 'to' and positive 'amount' are required.");
+        }
+
+        try
+        {
+            var result = await _svc.Convert(from, to, amount);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
