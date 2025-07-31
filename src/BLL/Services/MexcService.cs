@@ -10,14 +10,14 @@ using DAL.Interfaces;
 
 namespace BLL.Services;
 
-public class MexcApiClient : IExchangeApiClient
+public class MexcService : IExchangeService
 {
     
     private readonly HttpClient _http;
     private const string _exchangeName = "MEXC";
     private readonly HashSet<string> _supportedSymbols;
 
-    public MexcApiClient(HttpClient http, ICurrencyPairRepository pairRepo)
+    public MexcService(HttpClient http, ICurrencyPairRepository pairRepo)
     {
         _http = http;
         

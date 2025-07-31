@@ -10,13 +10,13 @@ using DAL.Interfaces;
 
 namespace BLL.Services;
 
-public class BingxApiClient : IExchangeApiClient
+public class BingxService : IExchangeService
 {
     private readonly HttpClient _http;
     private readonly string _exchangeName = "BingX";
     private readonly HashSet<string> _supportedSymbols;
 
-    public BingxApiClient(HttpClient http, ICurrencyPairRepository pairRepo)
+    public BingxService(HttpClient http, ICurrencyPairRepository pairRepo)
     {
         _http = http;
 

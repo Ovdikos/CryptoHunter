@@ -43,61 +43,61 @@ var kuCoinConfig   = exchangeConfigs
 
 // BINANCE
 builder.Services
-    .AddHttpClient<BinanceApiClient>(client =>
+    .AddHttpClient<BinanceService>(client =>
     {
         client.BaseAddress = new Uri(binanceConfig.BaseUrl);
     });
-builder.Services.AddTransient<IExchangeApiClient>(sp =>
-    sp.GetRequiredService<BinanceApiClient>());
+builder.Services.AddTransient<IExchangeService>(sp =>
+    sp.GetRequiredService<BinanceService>());
 
 // BYBIT
 builder.Services
-    .AddHttpClient<BybitApiClient>(client =>
+    .AddHttpClient<BybitService>(client =>
     {
         client.BaseAddress = new Uri(bybitConfig.BaseUrl);
     });
-builder.Services.AddTransient<IExchangeApiClient>(sp =>
-    sp.GetRequiredService<BybitApiClient>());
+builder.Services.AddTransient<IExchangeService>(sp =>
+    sp.GetRequiredService<BybitService>());
 
 
 // BINGX
 builder.Services
-    .AddHttpClient<BingxApiClient>(client =>
+    .AddHttpClient<BingxService>(client =>
     {
         client.BaseAddress = new Uri(bingxConfig.BaseUrl);
     });
-builder.Services.AddTransient<IExchangeApiClient>(sp =>
-    sp.GetRequiredService<BingxApiClient>());
+builder.Services.AddTransient<IExchangeService>(sp =>
+    sp.GetRequiredService<BingxService>());
 
 
 // MEXC
 builder.Services
-    .AddHttpClient<MexcApiClient>(client =>
+    .AddHttpClient<MexcService>(client =>
     {
         client.BaseAddress = new Uri(mexcConfig.BaseUrl);
     });
-builder.Services.AddTransient<IExchangeApiClient>(sp =>
-    sp.GetRequiredService<MexcApiClient>());
+builder.Services.AddTransient<IExchangeService>(sp =>
+    sp.GetRequiredService<MexcService>());
 
 
 // COINBASE
 builder.Services
-    .AddHttpClient<CoinbaseApiClient>(client =>
+    .AddHttpClient<CoinbaseService>(client =>
     {
         client.BaseAddress = new Uri(coinBaseConfig.BaseUrl);
     });
-builder.Services.AddTransient<IExchangeApiClient>(sp =>
-    sp.GetRequiredService<CoinbaseApiClient>());
+builder.Services.AddTransient<IExchangeService>(sp =>
+    sp.GetRequiredService<CoinbaseService>());
 
 
 // KuCoin
 builder.Services
-    .AddHttpClient<KuCoinApiClient>(client =>
+    .AddHttpClient<KuCoinService>(client =>
     {
         client.BaseAddress = new Uri(kuCoinConfig.BaseUrl);
     });
-builder.Services.AddTransient<IExchangeApiClient>(sp =>
-    sp.GetRequiredService<KuCoinApiClient>());
+builder.Services.AddTransient<IExchangeService>(sp =>
+    sp.GetRequiredService<KuCoinService>());
 
 builder.Services.AddTransient<IArbitrageService, ArbitrageService>();
 builder.Services.AddTransient<IPriceService, PriceService>();

@@ -4,9 +4,9 @@ using BLL.Interfaces;
 
 public class PriceService : IPriceService
 {
-    private readonly IEnumerable<IExchangeApiClient> _clients;
+    private readonly IEnumerable<IExchangeService> _clients;
 
-    public PriceService(IEnumerable<IExchangeApiClient> clients)
+    public PriceService(IEnumerable<IExchangeService> clients)
         => _clients = clients;
 
     public async Task<PriceDto> GetHighestBid(string pair)

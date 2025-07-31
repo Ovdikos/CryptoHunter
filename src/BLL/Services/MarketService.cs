@@ -8,9 +8,9 @@ namespace BLL.Services;
 
 public class MarketService : IMarketService
 {
-    private readonly IEnumerable<IExchangeApiClient> _clients;
+    private readonly IEnumerable<IExchangeService> _clients;
     private readonly ICurrencyPairRepository _pairRepo;
-    public MarketService(IEnumerable<IExchangeApiClient> clients, ICurrencyPairRepository pairRepo)
+    public MarketService(IEnumerable<IExchangeService> clients, ICurrencyPairRepository pairRepo)
     {
         _clients = clients;
         _pairRepo = pairRepo;

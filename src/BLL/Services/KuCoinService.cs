@@ -11,7 +11,7 @@ using DAL.Interfaces;
 
 namespace BLL.Services;
 
-public class KuCoinApiClient : IExchangeApiClient
+public class KuCoinService : IExchangeService
 {
     
     private readonly HttpClient _http;
@@ -19,7 +19,7 @@ public class KuCoinApiClient : IExchangeApiClient
     private readonly HashSet<string> _supportedSymbols;
     
     
-    public KuCoinApiClient(HttpClient http, IEnumerable<ExchangeConfig> configs, ICurrencyPairRepository pairRepo)
+    public KuCoinService(HttpClient http, IEnumerable<ExchangeConfig> configs, ICurrencyPairRepository pairRepo)
     {
         _http = http;
         

@@ -12,7 +12,7 @@ using DAL.Interfaces;
 
 namespace BLL.Services;
 
-public class BybitApiClient : IExchangeApiClient
+public class BybitService : IExchangeService
 {
     
     private readonly HttpClient _http;
@@ -20,7 +20,7 @@ public class BybitApiClient : IExchangeApiClient
     private readonly HashSet<string> _supportedSymbols;
 
 
-    public BybitApiClient(HttpClient http, IEnumerable<ExchangeConfig> configs, ICurrencyPairRepository pairRepo)
+    public BybitService(HttpClient http, IEnumerable<ExchangeConfig> configs, ICurrencyPairRepository pairRepo)
     {
         _http = http;
         

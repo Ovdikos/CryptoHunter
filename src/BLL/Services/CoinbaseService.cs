@@ -11,14 +11,14 @@ using DAL.Interfaces;
 
 namespace BLL.Services;
 
-public class CoinbaseApiClient : IExchangeApiClient
+public class CoinbaseService : IExchangeService
 {
     
     private readonly HttpClient _http;
     private const string _exchangeName = "Coinbase";
     private readonly HashSet<string> _supportedSymbols;
 
-    public CoinbaseApiClient(HttpClient http, ICurrencyPairRepository pairRepo)
+    public CoinbaseService(HttpClient http, ICurrencyPairRepository pairRepo)
     {
         _http = http;
         

@@ -8,9 +8,9 @@ namespace BLL.Services;
 public class ArbitrageService : IArbitrageService
 {
     
-    private readonly IEnumerable<IExchangeApiClient> _clients;
+    private readonly IEnumerable<IExchangeService> _clients;
 
-    public ArbitrageService(IEnumerable<IExchangeApiClient> clients)
+    public ArbitrageService(IEnumerable<IExchangeService> clients)
     {
         _clients = clients;
     }

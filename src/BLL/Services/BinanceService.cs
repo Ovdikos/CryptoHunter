@@ -11,7 +11,7 @@ using DAL.Interfaces;
 
 namespace BLL.Services;
 
-public class BinanceApiClient : IExchangeApiClient
+public class BinanceService : IExchangeService
 {
     
     
@@ -19,7 +19,7 @@ public class BinanceApiClient : IExchangeApiClient
     private readonly string _exchangeName = "Binance";
     private readonly HashSet<string> _supportedSymbols;
 
-    public BinanceApiClient(HttpClient http, IEnumerable<ExchangeConfig> configs, ICurrencyPairRepository pairRepo)
+    public BinanceService(HttpClient http, IEnumerable<ExchangeConfig> configs, ICurrencyPairRepository pairRepo)
     {
         _http = http;
         

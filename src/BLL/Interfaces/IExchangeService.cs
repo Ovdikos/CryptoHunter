@@ -1,10 +1,9 @@
-﻿using BLL.DTOs;
-using BLL.DTOs._24hStat;
+﻿using BLL.DTOs._24hStat;
 using BLL.DTOs.Arbitrage;
 
 namespace BLL.Interfaces;
 
-public interface IExchangeApiClient
+public interface IExchangeService
 {
     
     string ExchangeName { get; }
