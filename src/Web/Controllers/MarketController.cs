@@ -44,7 +44,7 @@ public class MarketController : ControllerBase
         return Ok(result);
     }
     
-    [HttpGet]
+    [HttpGet("converter")]
     public async Task<ActionResult<ConversionDto>> Get(
         [FromQuery] string from,
         [FromQuery] string to,

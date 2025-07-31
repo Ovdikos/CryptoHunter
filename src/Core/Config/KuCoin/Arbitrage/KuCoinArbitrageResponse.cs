@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Core.Config.KuCoin;
+namespace Core.Config.KuCoin.Arbitrage;
 
 public class KuCoinArbitrageResponse
 {

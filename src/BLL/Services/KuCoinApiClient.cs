@@ -6,6 +6,7 @@ using BLL.Interfaces;
 using Core.Config;
 using Core.Config.KuCoin;
 using Core.Config.KuCoin._24hStat;
+using Core.Config.KuCoin.Arbitrage;
 using DAL.Interfaces;
 
 namespace BLL.Services;

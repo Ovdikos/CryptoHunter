@@ -5,5 +5,5 @@
 // public class CoinbaseSpotPriceResponse
 // {
 //     [JsonPropertyName("data")]
-//     public CoinbaseSpotPrice Data { get; set; } = null!;
+//     public CoinbaseSpotPrice Context { get; set; } = null!;
 // }
